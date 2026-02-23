@@ -1,8 +1,11 @@
 package com.microservice.auth_service.controller;
 
 import com.microservice.auth_service.dto.LoginRequest;
+import com.microservice.auth_service.dto.LoginResponse;
 import com.microservice.auth_service.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,7 +16,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
 
         boolean isValid = authService.validateUser(
                 request.getUsername(),
@@ -21,9 +24,12 @@ public class AuthController {
         );
 
         if (isValid) {
-            return "Login successful";
+            return ResponseEntity.ok(
+                    new LoginResponse("Login successful", true)
+            );
         } else {
-            return "Invalid credentials";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse("Invalid credentials", false));
         }
     }
 }
