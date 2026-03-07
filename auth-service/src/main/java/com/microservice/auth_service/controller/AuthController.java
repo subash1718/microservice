@@ -1,42 +1,31 @@
 package com.microservice.auth_service.controller;
 
-import com.microservice.auth_service.dto.LoginRequest;
-import com.microservice.auth_service.dto.LoginResponse;
-import com.microservice.auth_service.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import com.microservice.auth_service.security.JwtUtil;
 
 @RestController
 @RequestMapping("/api")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
-
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public Map<String,Object> login(@RequestBody Map<String,String> request){
 
-        if (request.getUsername() == null || request.getUsername().isEmpty()
-                || request.getPassword() == null || request.getPassword().isEmpty()) {
+        String username = request.get("username");
+        String password = request.get("password");
 
-            return ResponseEntity.badRequest()
-                    .body(new LoginResponse("Username and password must not be empty", false));
-        }
+        if("subhash".equals(username) && "1234".equals(password)){
 
-        boolean isValid = authService.validateUser(
-                request.getUsername(),
-                request.getPassword()
-        );
+            String token = JwtUtil.generateToken(username);
 
-        if (isValid) {
-            return ResponseEntity.ok(
-                    new LoginResponse("Login successful", true)
+            return Map.of(
+                "token", token,
+                "success", true
             );
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new LoginResponse("Invalid credentials", false));
         }
+
+        return Map.of(
+            "success", false
+        );
     }
 }

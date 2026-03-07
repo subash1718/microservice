@@ -1,5 +1,6 @@
 com/microservice/auth_service/dto/LoginResponse.class
 com/microservice/auth_service/controller/AuthController.class
+com/microservice/auth_service/security/JwtUtil.class
 com/microservice/auth_service/service/AuthService.class
 com/microservice/auth_service/dto/LoginRequest.class
 com/microservice/auth_service/config/SecurityConfig.class

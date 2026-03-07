@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<style>
+body { font-family: Arial; text-align:center; margin-top:100px; }
+input { padding:10px; margin:5px; }
+button { padding:10px 20px; }
+#error { color:red; }
+</style>
+</head>
+
+<body>
+
+<h2>Microservices Login</h2>
+
+<input id="username" placeholder="Username"><br>
+<input id="password" type="password" placeholder="Password"><br>
+
+<button onclick="login()">Login</button>
+
+<p id="error"></p>
+
+<script>
+
+async function login(){
+
+ const username = document.getElementById("username").value
+ const password = document.getElementById("password").value
+
+ if(!username || !password){
+   document.getElementById("error").innerText="Please fill all fields"
+   return
+ }
+
+ const response = await fetch("http://localhost:8080/api/login",{
+   method:"POST",
+   headers:{ "Content-Type":"application/json" },
+   body: JSON.stringify({username,password})
+ })
+
+ const data = await response.json()
+
+ if(data.success){
+   alert("Login successful!")
+ } else {
+   document.getElementById("error").innerText="Invalid credentials"
+ }
+
+}
+
+</script>
+
+</body>
+</html>
