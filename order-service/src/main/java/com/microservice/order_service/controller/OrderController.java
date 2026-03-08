@@ -1,19 +1,26 @@
 package com.microservice.order_service.controller;
 
+import com.microservice.order_service.model.Order;
+import com.microservice.order_service.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
 
-    @GetMapping
-    public List<Map<String,Object>> getOrders(){
+    @Autowired
+    private OrderRepository orderRepository;
 
-        return List.of(
-            Map.of("id",1,"product","Laptop"),
-            Map.of("id",2,"product","Phone")
-        );
+    @GetMapping
+    public List<Order> getOrders() {
+        return orderRepository.findAll();
+    }
+
+    @PostMapping
+    public Order createOrder(@RequestBody Order order) {
+        return orderRepository.save(order);
     }
 }
