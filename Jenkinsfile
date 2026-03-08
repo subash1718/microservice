@@ -3,39 +3,33 @@ pipeline {
 
     stages {
 
-        stage('Build Auth Service') {
+        stage('Checkout Code') {
             steps {
-                sh 'cd auth-service && ./mvnw clean install'
+                git 'https://github.com/subash1718/microservice.git'
             }
         }
 
-        stage('Test Auth Service') {
+        stage('Build Auth Service') {
             steps {
-                sh 'cd auth-service && ./mvnw test'
+                dir('auth-service') {
+                    sh './mvnw clean install'
+                }
             }
         }
 
         stage('Build Order Service') {
             steps {
-                sh 'cd order-service && ./mvnw clean install'
+                dir('order-service') {
+                    sh './mvnw clean install'
+                }
             }
         }
 
-        stage('Test Order Service') {
+        stage('Build API Gateway') {
             steps {
-                sh 'cd order-service && ./mvnw test'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                sh 'sonar-scanner'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Microservices build successful'
+                dir('api-gateway') {
+                    sh './mvnw clean install'
+                }
             }
         }
 
