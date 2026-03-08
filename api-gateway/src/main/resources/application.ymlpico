@@ -9,7 +9,7 @@ spring:
     gateway:
       routes:
         - id: order-service
-          uri: lb://ORDER-SERVICE
+          uri: http://order-service:8082
           predicates:
             - Path=/orders/**
 
