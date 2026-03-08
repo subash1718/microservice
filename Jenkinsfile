@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/subash1718/microservice.git'
+                git branch: 'main', url: 'https://github.com/subash1718/microservice.git'
             }
         }
 
