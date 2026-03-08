@@ -1,4 +1,4 @@
-kserver:
+server:
   port: 8080
 
 spring:
@@ -7,20 +7,14 @@ spring:
 
   cloud:
     gateway:
-      routes:
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/orders/**
-
-        - id: auth-service
-          uri: lb://AUTH-SERVICE
-          predicates:
-            - Path=/api/**
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - StripPrefix=1
 
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
     service-url:
       defaultZone: http://eureka-server:8761/eureka
