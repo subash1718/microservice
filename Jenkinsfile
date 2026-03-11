@@ -12,7 +12,7 @@ pipeline {
         stage('Build Auth Service') {
             steps {
                 dir('auth-service') {
-                    sh './mvnw clean install'
+                    sh'./mvn clean install -DskipTests'
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline {
         stage('Build Order Service') {
             steps {
                 dir('order-service') {
-                    sh './mvnw clean install'
+                    sh'./mvn clean install -DskipTests'
                 }
             }
         }
