@@ -53,6 +53,18 @@ pipeline {
                     }
                 }
             }
+            stage('Test & Coverage') {
+                steps {
+                    dir('order-service') {
+                        sh 'mvn test'
+                    }
+                }
+                post {
+                    always {
+                        junit '**/target/surefire-reports/*.xml'
+                    }
+                }
+            }
         }
     }
 
