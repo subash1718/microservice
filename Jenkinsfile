@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    tools{
+    tools {
         maven 'Maven3'
         jdk 'JDK21'
     }
@@ -45,23 +45,12 @@ pipeline {
                 }
             }
         }
+
         stage('SonarQube Analysis') {
             steps {
                 dir('order-service') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                         sh 'mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN'
-                    }
-                }
-            }
-            stage('Test & Coverage') {
-                steps {
-                    dir('order-service') {
-                        sh 'mvn test'
-                    }
-                }
-                post {
-                    always {
-                        junit '**/target/surefire-reports/*.xml'
                     }
                 }
             }
