@@ -2,11 +2,11 @@ package com.microservice.order_service;
 
 import org.junit.jupiter.api.Test;
 
-public class OrderServiceApplicationTests {
+class OrderServiceApplicationTests {
 
     @Test
-    void simpleTest() {
-        System.out.println("JUnit working");
+    void contextLoads() {
+        System.out.println("Application test running");
     }
 
 }
