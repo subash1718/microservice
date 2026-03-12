@@ -1,29 +1,28 @@
 package com.microservice.order_service;
 
 import com.microservice.order_service.controller.OrderController;
-import com.microservice.order_service.model.Order;
 import com.microservice.order_service.repository.OrderRepository;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+@WebMvcTest(OrderController.class)
 class OrderControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private OrderRepository orderRepository;
+
     @Test
-    void testGetOrders() {
-
-        OrderRepository repo = Mockito.mock(OrderRepository.class);
-        OrderController controller = new OrderController();
-
-        Order order = new Order();
-        order.setProduct("Pizza");
-        order.setQuantity(2);
-
-        Mockito.when(repo.findAll()).thenReturn(Arrays.asList(order));
-
-        assertNotNull(order);
+    void testGetOrdersEndpoint() throws Exception {
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isOk());
     }
 }

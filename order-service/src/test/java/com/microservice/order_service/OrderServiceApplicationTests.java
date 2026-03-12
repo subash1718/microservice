@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 class OrderServiceApplicationTests {
 
     @Test
-    void contextLoads() {
-        System.out.println("Application test running");
+    void testApplicationStarts() {
+        System.out.println("Test executed successfully");
     }
 
 }
