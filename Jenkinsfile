@@ -5,6 +5,7 @@ pipeline {
         maven 'Maven3'
         jdk 'JDK21'
     }
+
     stages {
 
         stage('Checkout Code') {
@@ -16,7 +17,7 @@ pipeline {
         stage('Build Auth Service') {
             steps {
                 dir('auth-service') {
-                    sh'mvn clean install -DskipTests'
+                    sh 'mvn clean install -DskipTests'
                 }
             }
         }
@@ -24,7 +25,7 @@ pipeline {
         stage('Build Order Service') {
             steps {
                 dir('order-service') {
-                    sh'mvn clean install -DskipTests'
+                    sh 'mvn clean install -DskipTests'
                 }
             }
         }
@@ -32,10 +33,25 @@ pipeline {
         stage('Build API Gateway') {
             steps {
                 dir('api-gateway') {
-                    sh './mvnw clean install'
+                    sh 'mvn clean install -DskipTests'
                 }
             }
         }
 
+        stage('Test & Coverage') {
+            steps {
+                dir('order-service') {
+                    sh 'mvn test'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            jacoco execPattern: 'order-service/target/jacoco.exec',
+                   classPattern: 'order-service/target/classes',
+                   sourcePattern: 'order-service/src/main/java'
+        }
     }
 }
