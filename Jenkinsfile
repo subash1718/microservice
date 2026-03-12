@@ -45,6 +45,13 @@ pipeline {
                 }
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                dir('order-service') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
     }
 
     post {
