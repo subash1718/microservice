@@ -15,8 +15,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-    				url: 'https://github.com/subash1718/microservice.git',
-    				credentialsId: 'github-token'git branch: 'main', url: 'https://github.com/subash1718/microservice.git'
+                    url: 'https://github.com/subash1718/microservice.git'
             }
         }
 
@@ -26,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests (JUnit + Karate)') {
+        stage('Test & Coverage (JUnit + JaCoCo)') {
             steps {
                 dir('order-service') {
                     sh 'mvn test'
@@ -55,24 +54,25 @@ pipeline {
 
         stage('Docker Build') {
             steps {
+                echo 'Building Docker Images...'
+
                 sh 'docker build -t order-service ./order-service'
                 sh 'docker build -t auth-service ./auth-service'
                 sh 'docker build -t api-gateway ./api-gateway'
             }
         }
 
-        stage('Docker Compose Up (Optional)') {
+        stage('Run Containers (Docker Compose)') {
             steps {
-                sh 'docker-compose up -d' 
+                echo 'Starting containers...'
+                sh 'docker-compose down || true'
+                sh 'docker-compose up -d'
             }
         }
     }
 
     post {
         always {
-            // JUnit reports already handled above
-
-            // JaCoCo Coverage
             jacoco execPattern: 'order-service/target/jacoco.exec',
                    classPattern: 'order-service/target/classes',
                    sourcePattern: 'order-service/src/main/java'
