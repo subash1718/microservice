@@ -1,28 +1,36 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'
-        jdk 'JDK21'
+    options {
+        skipDefaultCheckout(true)
     }
 
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git 'https://github.com/subash1718/microservice.git'
+                git branch: 'main', url: 'https://github.com/subash1718/microservice.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Order Service (Maven)') {
             steps {
-                sh 'mvn clean package'
+                sh '''
+                docker run --rm \
+                -v $PWD:/app \
+                -w /app/order-service \
+                maven:3.9.9-eclipse-temurin-21 \
+                mvn clean package
+                '''
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t order-service:v1 .'
+                sh '''
+                cd order-service
+                docker build -t order-service:v1 .
+                '''
             }
         }
 
@@ -34,6 +42,12 @@ pipeline {
                 docker run -d -p 8082:8082 --network microservice-net order-service:v1
                 '''
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished'
         }
     }
 }
