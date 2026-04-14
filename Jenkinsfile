@@ -13,12 +13,12 @@ pipeline {
             }
         }
 
-        stage('Build Order Service (Skip Tests)') {
+        stage('Build Order Service') {
             steps {
                 sh '''
                 cd order-service
                 chmod +x mvnw
-                ./mvnw clean package -DskipTests
+                ./mvnw clean package -Dmaven.test.skip=true
                 '''
             }
         }
