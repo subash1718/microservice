@@ -1,11 +1,15 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     stages {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/subash1718/microservice.git'
+                git branch: 'main', url: 'https://github.com/subash1718/microservice.git'
             }
         }
 
