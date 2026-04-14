@@ -3,12 +3,18 @@ pipeline {
 
     stages {
 
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/subash1718/microservice.git'
+            }
+        }
+
         stage('Build (Maven)') {
             steps {
                 sh '''
                 docker run --rm \
                 -v $PWD:/app \
-                -w /app \
+                -w /app/order-service \
                 maven:3.9.9-eclipse-temurin-21 \
                 mvn clean package
                 '''
@@ -17,7 +23,10 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t order-service:v1 .'
+                sh '''
+                cd order-service
+                docker build -t order-service:v1 .
+                '''
             }
         }
 
@@ -26,18 +35,15 @@ pipeline {
                 sh '''
                 docker stop order-service || true
                 docker rm order-service || true
-                docker run -d -p 8082:8082 --network microservice-net --name order-service order-service:v1
+                docker run -d -p 8082:8082 --network microservice-net order-service:v1
                 '''
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Pipeline executed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed. Check logs.'
+        always {
+            echo 'Pipeline finished'
         }
     }
 }
