@@ -1,89 +1,34 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'
-        jdk 'JDK21'
-    }
-
-    environment {
-        SONAR_TOKEN = credentials('sonar-token')
-    }
-
     stages {
 
-        stage('Checkout Code') {
+        stage('Clone') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/subash1718/microservice.git'
+                git 'https://github.com/subash1718/microservice.git'
             }
         }
 
-        stage('Build All Services') {
+        stage('Build') {
             steps {
-                sh 'mvn clean compile'
-            }
-        }
-
-        stage('Test & Coverage (JUnit + JaCoCo)') {
-            steps {
-                dir('order-service') {
-                    sh 'mvn test'
-                }
-            }
-            post {
-                always {
-                    junit 'order-service/target/surefire-reports/*.xml'
-                }
-            }
-        }
-
-        stage('Code Quality - SonarQube') {
-            steps {
-                dir('order-service') {
-                    sh 'mvn sonar:sonar -Dsonar.login=$SONAR_TOKEN'
-                }
-            }
-        }
-
-        stage('Package Services') {
-            steps {
-                sh 'mvn package -DskipTests'
+                sh 'mvn clean package'
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker Images...'
-
-                sh 'docker build -t order-service ./order-service'
-                sh 'docker build -t auth-service ./auth-service'
-                sh 'docker build -t api-gateway ./api-gateway'
+                sh 'docker build -t order-service:v1 .'
             }
         }
 
-        stage('Run Containers (Docker Compose)') {
+        stage('Deploy') {
             steps {
-                echo 'Starting containers...'
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
+                sh '''
+                docker stop order-service || true
+                docker rm order-service || true
+                docker run -d -p 8082:8082 --network microservice-net order-service:v1
+                '''
             }
-        }
-    }
-
-    post {
-        always {
-            jacoco execPattern: 'order-service/target/jacoco.exec',
-                   classPattern: 'order-service/target/classes',
-                   sourcePattern: 'order-service/src/main/java'
-        }
-
-        success {
-            echo '✅ Pipeline executed successfully!'
-        }
-
-        failure {
-            echo '❌ Pipeline failed. Check logs.'
         }
     }
 }
