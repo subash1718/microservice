@@ -13,12 +13,18 @@ pipeline {
             }
         }
 
+        stage('Debug Structure') {
+            steps {
+                sh 'ls -R'
+            }
+        }
+
         stage('Build (Maven)') {
             steps {
                 sh '''
                 docker run --rm \
                 -v $PWD:/app \
-                -w /app/order-service \
+                -w /app \
                 maven:3.9.9-eclipse-temurin-21 \
                 mvn clean package
                 '''
@@ -28,7 +34,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                cd order-service
+                cd order-service || cd .
                 docker build -t order-service:v1 .
                 '''
             }
