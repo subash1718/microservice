@@ -13,14 +13,12 @@ pipeline {
             }
         }
 
-        stage('Build Order Service (Maven)') {
+        stage('Build Order Service (Maven Wrapper)') {
             steps {
                 sh '''
-                docker run --rm \
-                -v $PWD:/app \
-                -w /app/order-service \
-                maven:3.9.9-eclipse-temurin-21 \
-                mvn clean package
+                cd order-service
+                chmod +x mvnw
+                ./mvnw clean package
                 '''
             }
         }
