@@ -1,7 +1,7 @@
 package com.microservice.order_service.controller;
 
 import com.microservice.order_service.model.Order;
-import com.microservice.order_service.repository.OrderRepository;
+import com.microservice.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +12,49 @@ import java.util.List;
 public class OrderController {
 
     @Autowired
-    private OrderRepository orderRepository;
+    private OrderService orderService;
 
+    // ✅ Get all orders
     @GetMapping
     public List<Order> getOrders() {
-        return orderRepository.findAll();
+        return orderService.getAllOrders();
     }
 
+    // ✅ Create order (with inventory check)
     @PostMapping
     public Order createOrder(@RequestBody Order order) {
-        return orderRepository.save(order);
+        return orderService.createOrder(order);
+    }
+
+    // ✅ Get order by ID
+    @GetMapping("/{id}")
+    public Order getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id);
+    }
+
+    // ✅ Payment API (US2 + US5)
+    @PostMapping("/payments/{id}")
+    public Order processPayment(@PathVariable Long id) {
+
+        Order order = orderService.getOrderById(id);
+
+        boolean success = true;
+
+        if (success) {
+            order.setStatus("PAID");
+        } else {
+            order.setStatus("FAILED");
+        }
+
+        // ✅ Notification
+        System.out.println("Notification: Order " + id + " status = " + order.getStatus());
+
+        return orderService.save(order);
+    }
+
+    // ✅ Get order status (US4)
+    @GetMapping("/{id}/status")
+    public String getOrderStatus(@PathVariable Long id) {
+        return orderService.getOrderById(id).getStatus();
     }
 }
