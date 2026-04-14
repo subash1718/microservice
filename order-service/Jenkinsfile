@@ -1,11 +1,16 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven3'
+        jdk 'JDK21'
+    }
+
     stages {
 
         stage('Clone') {
             steps {
-                git 'https://github.com/subash1718/fitnessproject.git'
+                git 'https://github.com/subash1718/microservice.git'
             }
         }
 

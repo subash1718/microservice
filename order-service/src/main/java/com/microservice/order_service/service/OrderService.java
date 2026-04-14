@@ -15,13 +15,11 @@ public class OrderService {
         this.repository = repository;
     }
 
-    // ✅ US3: Inventory check
     public Order createOrder(Order order) {
-
         if (order.getQuantity() > 5) {
             throw new RuntimeException("Not enough stock");
         }
-
+        order.setStatus("CREATED");
         return repository.save(order);
     }
 
@@ -30,7 +28,8 @@ public class OrderService {
     }
 
     public Order getOrderById(Long id) {
-        return repository.findById(id).orElseThrow();
+        return repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
     public Order save(Order order) {

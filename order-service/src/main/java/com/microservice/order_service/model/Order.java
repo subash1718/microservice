@@ -10,45 +10,33 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String product;
+    private String productName;
     private int quantity;
-
-    // ✅ NEW
+    private double price;
     private String status;
 
+    // ✅ Constructors
     public Order() {}
 
-    public Order(String product, int quantity) {
-        this.product = product;
+    public Order(String productName, int quantity, double price, String status) {
+        this.productName = productName;
         this.quantity = quantity;
-        this.status = "CREATED";
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getProduct() {
-        return product;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setProduct(String product) {
-        this.product = product;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public void setStatus(String status) {
+        this.price = price;
         this.status = status;
     }
+
+    // ✅ Getters and Setters
+    public Long getId() { return id; }
+
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
+
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

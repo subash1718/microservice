@@ -2,7 +2,6 @@ package com.microservice.order_service.controller;
 
 import com.microservice.order_service.model.Order;
 import com.microservice.order_service.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,8 +10,12 @@ import java.util.List;
 @RequestMapping("/orders")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    // ✅ Constructor Injection (BEST PRACTICE)
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     // ✅ Get all orders
     @GetMapping
@@ -38,7 +41,7 @@ public class OrderController {
 
         Order order = orderService.getOrderById(id);
 
-        boolean success = true;
+        boolean success = true; // simulate payment
 
         if (success) {
             order.setStatus("PAID");
@@ -46,7 +49,7 @@ public class OrderController {
             order.setStatus("FAILED");
         }
 
-        // ✅ Notification
+        // ✅ Notification (for demo)
         System.out.println("Notification: Order " + id + " status = " + order.getStatus());
 
         return orderService.save(order);
