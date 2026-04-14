@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Clone') {
-            steps {
-                git 'https://github.com/subash1718/microservice.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn clean package'
