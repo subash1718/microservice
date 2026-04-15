@@ -42,8 +42,12 @@ pipeline {
         stage('Deploy Order Service') {
             steps {
                 sh '''
-                docker stop order-service || true
-                docker rm order-service || true
+                echo "Stopping containers using port 8082..."
+
+                docker ps -q --filter "publish=8082" | xargs -r docker stop
+                docker ps -aq --filter "publish=8082" | xargs -r docker rm
+
+                echo "Starting new order-service container..."
 
                 docker run -d \
                 -p 8082:8082 \
