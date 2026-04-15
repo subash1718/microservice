@@ -1,9 +1,10 @@
 pipeline {
 agent any
 
+```
 environment {
     VERSION = "v1"
-    DOCKERHUB_USERNAME = "yourdockerhubusername"
+    DOCKERHUB_USERNAME = "subash1718"
 }
 
 stages {
@@ -56,26 +57,6 @@ stages {
         }
     }
 
-    stage('Push to Docker Hub') {
-        steps {
-            sh '''
-            echo "Pushing images to Docker Hub..."
-
-            docker tag order-service:$VERSION $DOCKERHUB_USERNAME/order-service:$VERSION
-            docker push $DOCKERHUB_USERNAME/order-service:$VERSION
-
-            docker tag auth-service:$VERSION $DOCKERHUB_USERNAME/auth-service:$VERSION
-            docker push $DOCKERHUB_USERNAME/auth-service:$VERSION
-
-            docker tag api-gateway:$VERSION $DOCKERHUB_USERNAME/api-gateway:$VERSION
-            docker push $DOCKERHUB_USERNAME/api-gateway:$VERSION
-
-            docker tag eureka-server:$VERSION $DOCKERHUB_USERNAME/eureka-server:$VERSION
-            docker push $DOCKERHUB_USERNAME/eureka-server:$VERSION
-            '''
-        }
-    }
-
     stage('Deploy Order Service') {
         steps {
             sh '''
@@ -98,10 +79,10 @@ post {
         echo 'Pipeline finished 🚀'
     }
     success {
-        echo '✅ SUCCESS: Deployment completed'
+        echo 'SUCCESS'
     }
     failure {
-        echo '❌ FAILURE: Check logs'
+        echo 'FAILURE'
     }
 }
 ```
