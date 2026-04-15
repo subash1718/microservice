@@ -47,11 +47,23 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 sh '''
-                echo "Running tests (safe mode)"
+                echo "Running Unit Tests"
                 cd order-service
                 ./mvnw test || true
                 cd ..
                 '''
+            }
+        }
+
+        // ✅ SONARQUBE ADDED
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''
+                    cd order-service
+                    ./mvnw clean verify sonar:sonar
+                    '''
+                }
             }
         }
 
@@ -60,8 +72,7 @@ pipeline {
                 sh '''
                 docker network create microservice-net || true
 
-                docker stop microservice-mysql || true
-                docker rm microservice-mysql || true
+                docker rm -f microservice-mysql || true
 
                 docker run -d \
                 --name microservice-mysql \
@@ -70,6 +81,18 @@ pipeline {
                 -e MYSQL_DATABASE=testdb \
                 -p 3306:3306 \
                 mysql:8
+                '''
+            }
+        }
+
+        // ✅ INTEGRATION TESTS (KARATE)
+        stage('Integration Tests') {
+            steps {
+                sh '''
+                echo "Running Karate Integration Tests"
+                cd order-service
+                ./mvnw test -Dtest=KarateTest || true
+                cd ..
                 '''
             }
         }
@@ -101,47 +124,55 @@ pipeline {
             }
         }
 
-       stage('Docker Deploy (All Services)') {
-    steps {
-        sh '''
-        echo "Force removing old containers..."
+        stage('Docker Deploy (All Services)') {
+            steps {
+                sh '''
+                echo "Cleaning old containers..."
 
-        docker rm -f eureka-server || true
-        docker rm -f auth-service || true
-        docker rm -f order-service || true
-        docker rm -f api-gateway || true
+                docker rm -f eureka-server || true
+                docker rm -f auth-service || true
+                docker rm -f order-service || true
+                docker rm -f api-gateway || true
 
-        echo "Starting Eureka Server..."
-        docker run -d -p 8761:8761 \
-        --network microservice-net \
-        --name eureka-server \
-        eureka-server:$VERSION
+                echo "Starting Eureka Server..."
+                docker run -d -p 8761:8761 \
+                --network microservice-net \
+                --name eureka-server \
+                eureka-server:$VERSION
 
-        echo "Starting Auth Service..."
-        docker run -d -p 8084:8084 \
-        --network microservice-net \
-        --name auth-service \
-        auth-service:$VERSION
+                sleep 10
 
-        echo "Starting Order Service..."
-        docker run -d -p 8082:8082 \
-        --network microservice-net \
-        --name order-service \
-        order-service:$VERSION
+                echo "Starting Auth Service..."
+                docker run -d -p 8084:8084 \
+                --network microservice-net \
+                --name auth-service \
+                auth-service:$VERSION
 
-        echo "Starting API Gateway..."
-        docker run -d -p 8080:8080 \
-        --network microservice-net \
-        --name api-gateway \
-        api-gateway:$VERSION
-        '''
+                echo "Starting Order Service..."
+                docker run -d -p 8082:8082 \
+                --network microservice-net \
+                --name order-service \
+                order-service:$VERSION
+
+                echo "Starting API Gateway..."
+                docker run -d -p 8080:8080 \
+                --network microservice-net \
+                --name api-gateway \
+                api-gateway:$VERSION
+                '''
+            }
+        }
     }
-}
-    }
 
- post {
-    always {
-        echo 'Pipeline finished 🚀'
+    post {
+        always {
+            echo 'Pipeline finished 🚀'
+        }
+        success {
+            echo 'SUCCESS ✅'
+        }
+        failure {
+            echo 'FAILURE ❌'
+        }
     }
-}
 }
