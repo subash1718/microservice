@@ -17,57 +17,15 @@ pipeline {
         stage('Build Services') {
             steps {
                 sh '''
-                echo "Building order-service"
-                cd order-service
-                chmod +x mvnw
-                ./mvnw clean package -Dmaven.test.skip=true
-                cd ..
-
-                echo "Building auth-service"
-                cd auth-service
-                chmod +x mvnw
-                ./mvnw clean package -Dmaven.test.skip=true
-                cd ..
-
-                echo "Building api-gateway"
-                cd api-gateway
-                chmod +x mvnw
-                ./mvnw clean package -Dmaven.test.skip=true
-                cd ..
-
-                echo "Building eureka-server"
-                cd eureka-server
-                chmod +x mvnw
-                ./mvnw clean package -Dmaven.test.skip=true
-                cd ..
+                cd order-service && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
+                cd auth-service && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
+                cd api-gateway && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
+                cd eureka-server && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
                 '''
             }
         }
 
-        stage('Unit Tests') {
-            steps {
-                sh '''
-                echo "Running Unit Tests"
-                cd order-service
-                ./mvnw test || true
-                cd ..
-                '''
-            }
-        }
-
-        // ✅ SONARQUBE ADDED
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                    cd order-service
-                    ./mvnw clean verify sonar:sonar
-                    '''
-                }
-            }
-        }
-
-        stage('Start Services (MySQL + Network)') {
+        stage('Create Network & MySQL') {
             steps {
                 sh '''
                 docker network create microservice-net || true
@@ -78,26 +36,14 @@ pipeline {
                 --name microservice-mysql \
                 --network microservice-net \
                 -e MYSQL_ROOT_PASSWORD=root \
-                -e MYSQL_DATABASE=testdb \
+                -e MYSQL_DATABASE=orderdb \
                 -p 3306:3306 \
                 mysql:8
                 '''
             }
         }
 
-        // ✅ INTEGRATION TESTS (KARATE)
-        stage('Integration Tests') {
-            steps {
-                sh '''
-                echo "Running Karate Integration Tests"
-                cd order-service
-                ./mvnw test -Dtest=KarateTest || true
-                cd ..
-                '''
-            }
-        }
-
-        stage('Docker Build Images') {
+        stage('Build Docker Images') {
             steps {
                 sh '''
                 docker build -t order-service:$VERSION ./order-service
@@ -108,58 +54,44 @@ pipeline {
             }
         }
 
-        stage('Docker Push Images') {
+        stage('Start Services') {
             steps {
                 sh '''
-                docker tag order-service:$VERSION $DOCKERHUB_USERNAME/order-service:$VERSION
-                docker tag auth-service:$VERSION $DOCKERHUB_USERNAME/auth-service:$VERSION
-                docker tag api-gateway:$VERSION $DOCKERHUB_USERNAME/api-gateway:$VERSION
-                docker tag eureka-server:$VERSION $DOCKERHUB_USERNAME/eureka-server:$VERSION
+                docker rm -f eureka-server auth-service order-service api-gateway || true
 
-                docker push $DOCKERHUB_USERNAME/order-service:$VERSION || true
-                docker push $DOCKERHUB_USERNAME/auth-service:$VERSION || true
-                docker push $DOCKERHUB_USERNAME/api-gateway:$VERSION || true
-                docker push $DOCKERHUB_USERNAME/eureka-server:$VERSION || true
+                docker run -d -p 8761:8761 --network microservice-net --name eureka-server eureka-server:$VERSION
+                sleep 15
+
+                docker run -d -p 8084:8084 --network microservice-net --name auth-service auth-service:$VERSION
+                docker run -d -p 8082:8082 --network microservice-net --name order-service order-service:$VERSION
+                docker run -d -p 8080:8080 --network microservice-net --name api-gateway api-gateway:$VERSION
+
+                echo "Waiting for services..."
+                sleep 25
                 '''
             }
         }
 
-        stage('Docker Deploy (All Services)') {
+        stage('Integration Test (Karate)') {
             steps {
                 sh '''
-                echo "Cleaning old containers..."
-
-                docker rm -f eureka-server || true
-                docker rm -f auth-service || true
-                docker rm -f order-service || true
-                docker rm -f api-gateway || true
-
-                echo "Starting Eureka Server..."
-                docker run -d -p 8761:8761 \
-                --network microservice-net \
-                --name eureka-server \
-                eureka-server:$VERSION
-
-                sleep 10
-
-                echo "Starting Auth Service..."
-                docker run -d -p 8084:8084 \
-                --network microservice-net \
-                --name auth-service \
-                auth-service:$VERSION
-
-                echo "Starting Order Service..."
-                docker run -d -p 8082:8082 \
-                --network microservice-net \
-                --name order-service \
-                order-service:$VERSION
-
-                echo "Starting API Gateway..."
-                docker run -d -p 8080:8080 \
-                --network microservice-net \
-                --name api-gateway \
-                api-gateway:$VERSION
+                cd order-service
+                ./mvnw test
                 '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                    cd order-service
+                    ./mvnw sonar:sonar \
+                    -Dsonar.projectKey=order-service \
+                    -Dsonar.host.url=http://sonarqube:9000 \
+                    -Dsonar.login=YOUR_TOKEN
+                    '''
+                }
             }
         }
     }
@@ -167,12 +99,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished 🚀'
-        }
-        success {
-            echo 'SUCCESS ✅'
-        }
-        failure {
-            echo 'FAILURE ❌'
         }
     }
 }

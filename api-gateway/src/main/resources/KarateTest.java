@@ -13,7 +13,6 @@ public class KarateTest {
     @Karate.Test
     Karate testAll() {
 
-        // ✅ dynamically set port
         System.setProperty("karate.server.port", String.valueOf(port));
 
         return Karate.run("classpath:karate")
