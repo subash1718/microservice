@@ -81,22 +81,22 @@ pipeline {
             }
         }
 
-     stage('SonarQube Analysis') {
-	    steps {
-	        withSonarQubeEnv('sonarqube') {
-	            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-	                sh '''
-	                cd order-service
-	                ./mvnw clean verify sonar:sonar \
-	                -Dsonar.projectKey=order-service \
-	                -Dsonar.projectName=order-service \
-	                -Dsonar.host.url=http://localhost:9000 \
-	                -Dsonar.login=$SONAR_TOKEN
-	                '''
-	            }
-	        }
-	    }
-	}
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                        cd order-service
+                        ./mvnw clean verify sonar:sonar \
+                        -Dsonar.projectKey=order-service \
+                        -Dsonar.projectName=order-service \
+                        -Dsonar.host.url=http://host.docker.internal:9000 \
+                        -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
