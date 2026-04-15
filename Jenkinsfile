@@ -21,7 +21,7 @@ pipeline {
                   echo "Building $service"
                   cd $service
                   chmod +x mvnw
-                  ./mvnw clean package -DskipTests
+                  ./mvnw clean package -Dmaven.test.skip=true
                   cd ..
                 done
                 '''
