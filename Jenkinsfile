@@ -1,8 +1,8 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
+    environment {
+        VERSION = "v1"
     }
 
     stages {
@@ -13,45 +13,45 @@ pipeline {
             }
         }
 
-        stage('Build Order Service') {
+        stage('Build All Services') {
             steps {
                 sh '''
-                cd order-service
-                chmod +x mvnw
-                ./mvnw clean package -Dmaven.test.skip=true
+                for service in order-service auth-service api-gateway eureka-server
+                do
+                  echo "Building $service"
+                  cd $service
+                  chmod +x mvnw
+                  ./mvnw clean package -DskipTests
+                  cd ..
+                done
                 '''
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build All') {
             steps {
                 sh '''
-                cd order-service
-                docker build -t order-service:v1 .
+                docker build -t order-service:$VERSION ./order-service
+                docker build -t auth-service:$VERSION ./auth-service
+                docker build -t api-gateway:$VERSION ./api-gateway
+                docker build -t eureka-server:$VERSION ./eureka-server
                 '''
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy All Services') {
             steps {
                 sh '''
-                docker stop order-service || true
-                docker rm order-service || true
-                docker run -d -p 8082:8082 --network microservice-net --name order-service order-service:v1
+                docker-compose down || true
+                docker-compose up -d
                 '''
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Pipeline executed successfully!'
-        }
-        failure {
-            echo '❌ Pipeline failed. Check logs.'
-        }
         always {
-            echo 'Pipeline finished'
+            echo 'Pipeline finished 🚀'
         }
     }
 }
