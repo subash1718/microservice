@@ -1,10 +1,14 @@
 package karate;
 
 import com.intuit.karate.junit5.Karate;
+import com.microservice.order_service.OrderServiceApplication; // 🔥 IMPORTANT
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        classes = OrderServiceApplication.class,   // 🔥 FIX
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
 public class KarateTest {
 
     @LocalServerPort
