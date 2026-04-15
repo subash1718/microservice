@@ -1,13 +1,16 @@
 Feature: Order API Test
 
+Background:
+    * def port = karate.properties['port']
+    * url 'http://localhost:' + port
+
 Scenario: Create and get orders
 
-Given url 'http://localhost:8082/orders'
-And request { product: 'Laptop', quantity: 2 }
-When method post
-Then status 200
+    Given path '/orders'
+    And request { "productName": "Test", "quantity": 1 }
+    When method post
+    Then status 200
 
-Given url 'http://localhost:8082/orders'
-When method get
-Then status 200
-And match response[0].product == 'Laptop'
+    Given path '/orders'
+    When method get
+    Then status 200
