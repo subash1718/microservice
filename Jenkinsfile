@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     VERSION = "v1"
     DOCKERHUB_USERNAME = "subash1718"
@@ -85,7 +84,6 @@ post {
         echo 'FAILURE'
     }
 }
-```
 
 }
 
