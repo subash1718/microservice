@@ -81,19 +81,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    sh '''
-                    cd order-service
-                    ./mvnw sonar:sonar \
-                    -Dsonar.projectKey=order-service \
-                    -Dsonar.host.url=http://sonarqube:9000 \
-                    -Dsonar.login=YOUR_TOKEN
-                    '''
-                }
-            }
-        }
+     stage('SonarQube Analysis') {
+	    steps {
+	        withSonarQubeEnv('sonarqube') {
+	            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+	                sh '''
+	                cd order-service
+	                ./mvnw clean verify sonar:sonar \
+	                -Dsonar.projectKey=order-service \
+	                -Dsonar.projectName=order-service \
+	                -Dsonar.host.url=http://localhost:9000 \
+	                -Dsonar.login=$SONAR_TOKEN
+	                '''
+	            }
+	        }
+	    }
+	}
     }
 
     post {
