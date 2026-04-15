@@ -18,13 +18,13 @@ class OrderRepositoryTest {
     void testSaveOrder() {
 
         Order order = new Order();
-        order.setProduct("Laptop");
+	order.setProductName("Laptop");
         order.setQuantity(2);
 
         Order savedOrder = orderRepository.save(order);
 
         assertNotNull(savedOrder.getId());
-        assertEquals("Laptop", savedOrder.getProduct());
+        assertEquals("Laptop",savedOrder.getProductName());
         assertEquals(2, savedOrder.getQuantity());
     }
 }
