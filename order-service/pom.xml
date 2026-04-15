@@ -1,3 +1,4 @@
+```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
@@ -25,7 +26,7 @@
 
     <dependencies>
 
-        <!-- 🌐 Spring Boot Web (FIX: exclude httpclient5) -->
+        <!-- 🌐 Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -43,14 +44,14 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- 🧪 H2 Database -->
+        <!-- 🧪 H2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 📡 Eureka Client -->
+        <!-- 📡 Eureka -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
@@ -71,7 +72,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 🔥 IMPORTANT FIX: HTTP Client 4 (for Karate) -->
+        <!-- HTTP Client (for Karate compatibility) -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -80,7 +81,7 @@
 
     </dependencies>
 
-    <!-- 🌍 Spring Cloud Version -->
+    <!-- 🌍 Spring Cloud -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -96,7 +97,7 @@
     <build>
         <plugins>
 
-            <!-- 🧪 Surefire Plugin -->
+            <!-- 🧪 Surefire -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -109,17 +110,29 @@
                 </configuration>
             </plugin>
 
-            <!-- 📊 JaCoCo -->
+            <!-- 📊 JaCoCo (FIXED & CLEAN) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
                 <executions>
+
+                    <!-- Attach agent -->
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
+
+                    <!-- Generate report -->
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+
                 </executions>
             </plugin>
 
@@ -127,3 +140,4 @@
     </build>
 
 </project>
+```
