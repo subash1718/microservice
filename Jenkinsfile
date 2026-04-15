@@ -139,16 +139,9 @@ pipeline {
 }
     }
 
-    post {
-        always {
-            junit '**/target/surefire-reports/*.xml'
-            echo 'Pipeline finished 🚀'
-        }
-        success {
-            echo 'SUCCESS ✅'
-        }
-        failure {
-            echo 'FAILURE ❌'
-        }
+ post {
+    always {
+        echo 'Pipeline finished 🚀'
     }
+}
 }
