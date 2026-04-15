@@ -1,7 +1,6 @@
 pipeline {
 agent any
 
-```
 environment {
     VERSION = "v1"
     DOCKERHUB_USERNAME = "yourdockerhubusername"
