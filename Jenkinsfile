@@ -101,50 +101,48 @@ pipeline {
             }
         }
 
-        stage('Docker Deploy (All Services)') {
-            steps {
-                sh '''
-                echo "Stopping old containers..."
+   stage('Docker Deploy (All Services)') {
+    steps {
+        sh '''
+        echo "Stopping containers by ports..."
 
-                docker stop order-service || true
-                docker rm order-service || true
+        # Stop containers using ports
+        docker ps -q --filter publish=8761 | xargs -r docker stop
+        docker ps -q --filter publish=8084 | xargs -r docker stop
+        docker ps -q --filter publish=8082 | xargs -r docker stop
+        docker ps -q --filter publish=8080 | xargs -r docker stop
 
-                docker stop auth-service || true
-                docker rm auth-service || true
+        docker ps -aq --filter publish=8761 | xargs -r docker rm
+        docker ps -aq --filter publish=8084 | xargs -r docker rm
+        docker ps -aq --filter publish=8082 | xargs -r docker rm
+        docker ps -aq --filter publish=8080 | xargs -r docker rm
 
-                docker stop api-gateway || true
-                docker rm api-gateway || true
+        echo "Starting Eureka Server..."
+        docker run -d -p 8761:8761 \
+        --network microservice-net \
+        --name eureka-server \
+        eureka-server:$VERSION
 
-                docker stop eureka-server || true
-                docker rm eureka-server || true
+        echo "Starting Auth Service..."
+        docker run -d -p 8084:8084 \
+        --network microservice-net \
+        --name auth-service \
+        auth-service:$VERSION
 
-                echo "Starting Eureka Server..."
-                docker run -d -p 8761:8761 \
-                --network microservice-net \
-                --name eureka-server \
-                eureka-server:$VERSION
+        echo "Starting Order Service..."
+        docker run -d -p 8082:8082 \
+        --network microservice-net \
+        --name order-service \
+        order-service:$VERSION
 
-                echo "Starting Auth Service..."
-                docker run -d -p 8084:8084 \
-                --network microservice-net \
-                --name auth-service \
-                auth-service:$VERSION
-
-                echo "Starting Order Service..."
-                docker run -d -p 8082:8082 \
-                --network microservice-net \
-                --name order-service \
-                order-service:$VERSION
-
-                echo "Starting API Gateway..."
-                docker run -d -p 8080:8080 \
-                --network microservice-net \
-                --name api-gateway \
-                api-gateway:$VERSION
-                '''
-            }
-        }
+        echo "Starting API Gateway..."
+        docker run -d -p 8080:8080 \
+        --network microservice-net \
+        --name api-gateway \
+        api-gateway:$VERSION
+        '''
     }
+}
 
     post {
         always {
