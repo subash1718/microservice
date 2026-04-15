@@ -39,11 +39,17 @@ pipeline {
             }
         }
 
-        stage('Deploy All Services') {
+        stage('Deploy Order Service') {
             steps {
                 sh '''
-                docker-compose down || true
-                docker-compose up -d
+                docker stop order-service || true
+                docker rm order-service || true
+
+                docker run -d \
+                -p 8082:8082 \
+                --network microservice-net \
+                --name order-service \
+                order-service:$VERSION
                 '''
             }
         }
@@ -52,6 +58,12 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished 🚀'
+        }
+        success {
+            echo '✅ SUCCESS: Deployment completed'
+        }
+        failure {
+            echo '❌ FAILURE: Check logs'
         }
     }
 }
