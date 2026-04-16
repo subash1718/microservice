@@ -20,6 +20,8 @@
     <properties>
         <java.version>17</java.version>
         <karate.version>1.4.1</karate.version>
+        <!-- Overridden by Jenkins: -Djenkins.build.number=${BUILD_NUMBER} -->
+        <jenkins.build.number>local</jenkins.build.number>
         <!-- SonarQube: pick up JaCoCo XML produced in test phase (see Jenkins: run `test` before `sonar:sonar`) -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -56,6 +58,11 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
         <!-- ✅ REQUIRED for Karate (HttpClient 4) -->
@@ -141,6 +148,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                        <configuration>
+                            <additionalProperties>
+                                <jenkins.build.number>${jenkins.build.number}</jenkins.build.number>
+                            </additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- SonarQube Scanner (Jenkins: sonar:sonar) -->
