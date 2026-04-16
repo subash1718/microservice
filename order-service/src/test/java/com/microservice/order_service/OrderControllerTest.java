@@ -85,7 +85,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value("PAID"));
     }
 
-    // ✅ GET /orders/{id}/status
+   
     @Test
     void testGetOrderStatus() throws Exception {
         Order order = new Order();
