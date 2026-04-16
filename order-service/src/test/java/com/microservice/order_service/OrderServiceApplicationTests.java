@@ -1,12 +1,13 @@
 package com.microservice.order_service;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
+@SpringBootTest
 class OrderServiceApplicationTests {
 
     @Test
-    void testApplicationStarts() {
-        System.out.println("Test executed successfully");
+    void contextLoads() {
+        // This ensures Spring Boot context loads
     }
-
 }
