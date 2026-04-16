@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         VERSION = "v1"
-        DOCKERHUB_USERNAME = "subash1718" 
+        DOCKERHUB_USERNAME = "subash1718"
     }
 
     stages {
@@ -14,10 +14,21 @@ pipeline {
             }
         }
 
+        // ✅ Run tests here (IMPORTANT for reports)
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                cd order-service
+                chmod +x mvnw
+                ./mvnw clean test
+                '''
+            }
+        }
+
         stage('Build Services') {
             steps {
                 sh '''
-                cd order-service && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
+                cd order-service && ./mvnw clean package -DskipTests && cd ..
                 cd auth-service && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
                 cd api-gateway && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
                 cd eureka-server && chmod +x mvnw && ./mvnw clean package -DskipTests && cd ..
@@ -101,6 +112,16 @@ pipeline {
 
     post {
         always {
+            // ✅ TEST METRICS GRAPH
+            junit 'order-service/target/surefire-reports/*.xml'
+
+            // ✅ CODE COVERAGE (JaCoCo)
+            jacoco(
+                execPattern: 'order-service/target/jacoco.exec',
+                classPattern: 'order-service/target/classes',
+                sourcePattern: 'order-service/src/main/java'
+            )
+
             echo 'Pipeline finished 🚀'
         }
     }
