@@ -45,12 +45,11 @@ class OrderServiceTest {
         Order order = new Order();
         order.setStatus("CREATED");
 
-        when(orderRepository.findAll()).thenReturn(Arrays.asList(order));
+        when(orderRepository.findAll()).thenReturn(Arrays.asList(order)); 
 
         assertEquals(1, orderService.getAllOrders().size());
     }
 
-    // ✅ Test getOrderById
     @Test
     void testGetOrderById() {
         Order order = new Order();

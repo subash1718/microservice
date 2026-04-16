@@ -58,7 +58,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value("CREATED"));
     }
 
-    // ✅ GET /orders/{id}
+  
     @Test
     void testGetOrderById() throws Exception {
         Order order = new Order();
@@ -71,7 +71,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.status").value("CREATED"));
     }
 
-    // ✅ POST /orders/payments/{id}
+  
     @Test
     void testProcessPayment() throws Exception {
         Order order = new Order();
