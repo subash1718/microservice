@@ -33,11 +33,23 @@ public class OrderService {
         return order.orElse(null);
     }
 
-    // ✅ TESTABLE LOGIC
+    /**
+     * Status text for API consumers: raw status or NOT_FOUND when missing.
+     */
+    public String getOrderStatusResponse(Long id) {
+        Order order = getOrderById(id);
+        if (order == null) {
+            return "NOT_FOUND";
+        }
+        return order.getStatus();
+    }
+
     public Order processPayment(Long id) {
         Order order = getOrderById(id);
 
-        if (order == null) return null;
+        if (order == null) {
+            return null;
+        }
 
         boolean success = id % 2 == 0;
 

@@ -31,21 +31,13 @@ public class OrderController {
         return orderService.getOrderById(id);
     }
 
-    // ✅ CLEAN (no logic here)
     @PostMapping("/payments/{id}")
     public Order processPayment(@PathVariable Long id) {
         return orderService.processPayment(id);
     }
 
-    // ✅ SAFE NULL HANDLING
     @GetMapping("/{id}/status")
     public String getOrderStatus(@PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
-
-        if (order == null) {
-            return "NOT_FOUND";
-        }
-
-        return order.getStatus();
+        return orderService.getOrderStatusResponse(id);
     }
 }
