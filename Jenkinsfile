@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        VERSION = "v1"
+        VERSION = "${BUILD_NUMBER}"
         DOCKERHUB_USERNAME = "subash1718"
     }
 
