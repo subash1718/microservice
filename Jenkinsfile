@@ -78,7 +78,7 @@ pipeline {
                 cd order-service
                 ./mvnw test
                 '''
-            }
+            } 
         }
 
         stage('SonarQube Analysis') {
