@@ -106,14 +106,15 @@ pipeline {
             } 
         }
 
-        // ✅ SONAR (NO REBUILD)
+        // ✅ SONAR — must run `test` here: earlier `clean package -DskipTests` deletes target/jacoco.exec,
+        // and the Karate-only stage would leave a partial exec if we skipped this.
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                         sh '''
                         cd order-service
-                        ./mvnw sonar:sonar \
+                        ./mvnw test sonar:sonar \
                         -Dsonar.projectKey=order-service \
                         -Dsonar.projectName=order-service \
                         -Dsonar.host.url=http://host.docker.internal:9000 \
