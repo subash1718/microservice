@@ -33,13 +33,13 @@ public class OrderService {
         return order.orElse(null);
     }
 
-    // ✅ NEW METHOD (IMPORTANT FOR COVERAGE)
+    // ✅ TESTABLE LOGIC
     public Order processPayment(Long id) {
         Order order = getOrderById(id);
 
         if (order == null) return null;
 
-        boolean success = id % 2 == 0; // ✅ deterministic (testable)
+        boolean success = id % 2 == 0;
 
         if (success) {
             order.setStatus("PAID");

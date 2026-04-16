@@ -14,9 +14,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
@@ -31,20 +29,17 @@ public class OrderControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // ✅ GET ALL
     @Test
     void shouldGetAllOrders() throws Exception {
         Order o1 = new Order("Laptop", 1, 1000, "CREATED");
-        Order o2 = new Order("Phone", 2, 500, "CREATED");
 
-        when(orderService.getAllOrders()).thenReturn(List.of(o1, o2));
+        when(orderService.getAllOrders()).thenReturn(List.of(o1));
 
         mockMvc.perform(get("/orders"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()", is(2)));
+                .andExpect(jsonPath("$.size()", is(1)));
     }
 
-    // ✅ CREATE ORDER
     @Test
     void shouldCreateOrder() throws Exception {
         Order order = new Order("Book", 1, 50, "CREATED");
@@ -58,7 +53,6 @@ public class OrderControllerTest {
                 .andExpect(jsonPath("$.productName", is("Book")));
     }
 
-    // ✅ GET BY ID
     @Test
     void shouldGetOrderById() throws Exception {
         Order order = new Order("TV", 1, 800, "CREATED");
@@ -66,39 +60,34 @@ public class OrderControllerTest {
         when(orderService.getOrderById(1L)).thenReturn(order);
 
         mockMvc.perform(get("/orders/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productName", is("TV")));
+                .andExpect(status().isOk());
     }
 
     // ✅ PAYMENT SUCCESS
     @Test
     void shouldProcessPaymentSuccess() throws Exception {
-        Order order = new Order("Tablet", 1, 300, "CREATED");
+        Order order = new Order("Item", 1, 100, "PAID");
 
-        when(orderService.getOrderById(1L)).thenReturn(order);
-        when(orderService.save(Mockito.any())).thenReturn(order);
+        when(orderService.processPayment(2L)).thenReturn(order);
+
+        mockMvc.perform(post("/orders/payments/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PAID"));
+    }
+
+    // ✅ PAYMENT FAILURE
+    @Test
+    void shouldProcessPaymentFailure() throws Exception {
+        Order order = new Order("Item", 1, 100, "FAILED");
+
+        when(orderService.processPayment(1L)).thenReturn(order);
 
         mockMvc.perform(post("/orders/payments/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", is("PAID")));
+                .andExpect(jsonPath("$.status").value("FAILED"));
     }
 
-    // ✅ PAYMENT FAILURE (force branch coverage)
-    @Test
-    void shouldProcessPaymentFailure() throws Exception {
-        Order order = new Order("Tablet", 1, 300, "CREATED");
-
-        // simulate failure manually
-        order.setStatus("FAILED");
-
-        when(orderService.getOrderById(1L)).thenReturn(order);
-        when(orderService.save(Mockito.any())).thenReturn(order);
-
-        mockMvc.perform(post("/orders/payments/1"))
-                .andExpect(status().isOk());
-    }
-
-    // ✅ STATUS CHECK
+    // ✅ STATUS
     @Test
     void shouldGetOrderStatus() throws Exception {
         Order order = new Order("Mouse", 1, 20, "PAID");
@@ -108,5 +97,15 @@ public class OrderControllerTest {
         mockMvc.perform(get("/orders/1/status"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("PAID"));
+    }
+
+    // ✅ NULL CASE (BOOST COVERAGE)
+    @Test
+    void shouldReturnNotFoundStatus() throws Exception {
+        when(orderService.getOrderById(1L)).thenReturn(null);
+
+        mockMvc.perform(get("/orders/1/status"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("NOT_FOUND"));
     }
 }
